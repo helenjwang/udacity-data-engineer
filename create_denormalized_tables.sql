@@ -13,7 +13,7 @@ except psycopg2.Error as e:
     print(e)
 conn.set_session(autocommit=True)
 
-/*add Create statements for all tables and insert data into the tables */
+/* add Create statements for all tables and insert data into the tables */
 try:
     cur.execute("CREATE TABLE IF NOT EXISTS transactions2 (transaction_id int, \
                                                            customer_name varchar, cashier_id int, \

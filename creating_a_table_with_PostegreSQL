@@ -1,0 +1,83 @@
+import psycopg2
+
+/* Create a connection to the database */
+try: 
+    conn = psycopg2.connect("host=127.0.0.1 dbname=studentdb user=student password=student")
+except psycopg2.Error as e: 
+    print("Error: Could not make connection to the Postgres database")
+    print(e)
+
+/* Use the connection to get a cursor that can be used to execute queries. */
+try: 
+    cur = conn.cursor()
+except psycopg2.Error as e: 
+    print("Error: Could not get curser to the Database")
+    print(e)
+
+/* Set automatic commit to be true  so that each action is committed without having to call conn.commit() after each command. */
+conn.set_session(autocommit = True)
+
+/* Create a database to do the work in. */
+try: 
+    cur.execute("create database music")
+except psycopg2.Error as e:
+    print(e)
+
+try: 
+    conn.close()
+except psycopg2.Error as e:
+    print(e)
+    
+try: 
+    conn = psycopg2.connect("host=127.0.0.1 dbname=music user=student password=student")
+except psycopg2.Error as e: 
+    print("Error: Could not make connection to the Postgres database")
+    print(e)
+    
+try: 
+    cur = conn.cursor()
+except psycopg2.Error as e: 
+    print("Error: Could not get curser to the Database")
+    print(e)
+
+conn.set_session(autocommit=True)
+
+/* Create a Song Library that contains a list of songs, including the song name, artist name, year, album it was from, and if it was a single. */
+try: 
+    cur.execute("CREATE TABLE IF NOT EXISTS music_library (song_title varchar, artist_name varchar, year int, alubum_name varchar, single varchar);")
+except psycopg2.Error as e: 
+    print("Error: Issue creating table")
+    print (e)
+
+/* Insert the following two rows in the table */
+try: 
+    cur.execute("INSERT INTO music_library (song_title, artist_name, year, alubum_name, single) \
+                 VALUES (%s, %s, %s, %s, %s)", \
+                 ("Across The Universe", "The Beatles", "1970", "False", "Let It Be"))
+except psycopg2.Error as e: 
+    print("Error: Inserting Rows")
+    print (e)
+    
+try: 
+    cur.execute("INSERT INTO music_library (song_title, artist_name, year, alubum_name, single) \
+                  VALUES (%s, %s, %s, %s, %s)",
+                  ("The Beatles", "Think For Yourself", "1965", "False", "Rubber Soul"))
+except psycopg2.Error as e: 
+    print("Error: Inserting Rows")
+    print (e)
+
+/* Validate your data was inserted into the table. */
+try: 
+    cur.execute("SELECT * FROM music_library;")
+except psycopg2.Error as e: 
+    print("Error: select *")
+    print (e)
+
+row = cur.fetchone()
+while row:
+   print(row)
+   row = cur.fetchone()
+
+/* close your cursor and connection. */
+cur.close()
+conn.close()
