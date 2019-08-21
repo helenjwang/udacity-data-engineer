@@ -143,3 +143,53 @@ JOIN rental r on (p.rental_id = r.rental_id)
 JOIN inventory i on (r.inventory_id = i.inventory_id)
 JOIN film f on (i.film_id = f.film_id)
 limit 5;
+                                
+/* 3.2 Insight 2: Top grossing cities
+Payments amounts are in table payment
+Cities are in table cities
+payment → customer → address → city */
+
+-- 3.2.1 Get the city of each payment 
+%%sql
+SELECT p.customer_id, p.rental_id, p.amount, ci.city
+FROM payment P
+JOIN custom c on (p.customer_id = c.customer_id)
+JOIN address s on (c.address_id = a.address_id)
+JOIN city on (a.city_id = ci.city_id)
+ORDER BY p.payment_date
+limit 10;
+
+--- 3.2.2 Top grossing cities
+
+/*3.3 Insight 3 : Revenue of a movie by customer city and by month
+3.3.1 Total revenue by month */
+%%sql
+SELECT sum(p.amount) as revenue, EXTRACT(month FROM p.payment_date) as month
+from payment p
+group by month
+order by revenue desc
+limit 10;
+
+--3.3.2 Each movie by customer city and by month (data cube)
+%%sql
+SELECT f.title, p.amount, p.customer_id, ci.city, p.payment_date,EXTRACT(month FROM p.payment_date) as month
+FROM payment p
+JOIN rental r  ON ( p.rental_id = r.rental_id )
+JOIN inventory i ON ( r.inventory_id = i.inventory_id )
+JOIN film f ON ( i.film_id = f.film_id)
+JOIN customer c  ON ( p.customer_id = c.customer_id )
+JOIN address a ON ( c.address_id = a.address_id )
+JOIN city ci ON ( a.city_id = ci.city_id )
+order by p.payment_date
+limit 10;
+
+---3.3.3 Sum of revenue of each movie by customer city and by month
+%sql
+SELECT f.title, ci.city EXTRACT(month FROM p.payment_date) as month, sum(p.amount) as revenue
+FROM payment p
+JOIN customer c on (p.customer_id = c.customer_id)
+JOIN address a ON ( c.address_id = a.address_id )
+JOIN city ci on (a.city_id = ci.city_id)
+group by (f.title, ci.city, month)
+order by month, revenue desc
+limit 10;
